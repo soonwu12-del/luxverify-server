@@ -2,10 +2,10 @@ FROM mcr.microsoft.com/playwright/python:v1.43.0-jammy
 
 WORKDIR /app
 
-COPY 서버/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY 서버/ .
+COPY . .
 
 EXPOSE 8000
 
