@@ -91,34 +91,44 @@ async def crawl_daangn(url: str = Query(...)):
             return {"crawlFailed": True}
         data = json.loads(m.group(1))
         props = data.get("props", {}).get("pageProps", {})
-        article = props.get("article") or props.get("product") or props.get("item") or props.get("articlePayload") or {}
+        article = (
+            props.get("article") or props.get("product") or
+            props.get("item") or props.get("articlePayload") or {}
+        )
         if not article:
             for v in props.values():
                 if isinstance(v, dict) and ("price" in v or "title" in v):
-                    article = v; break
+                    article = v
+                    break
         title = article.get("title") or article.get("name") or ""
-        try: price = int(str(article.get("price") or article.get("priceAmount") or 0).replace(",","").replace("원","").strip())
-        except: price = 0
+        try:
+            price = int(str(article.get("price") or article.get("priceAmount") or 0)
+                        .replace(",", "").replace("원", "").strip())
+        except:
+            price = 0
         desc = article.get("content") or article.get("description") or ""
         images = []
-        for key in ["images","thumbnails","photos"]:
+        for key in ["images", "thumbnails", "photos"]:
             val = article.get(key)
             if isinstance(val, list):
                 for img in val:
-                    src = img.get("url","") if isinstance(img,dict) else (img if isinstance(img,str) else "")
-                    if src: images.append(src)
+                    src = img.get("url", "") if isinstance(img, dict) else (img if isinstance(img, str) else "")
+                    if src:
+                        images.append(src)
                 break
         image = images[0] if images else (article.get("thumbnail") or "")
         seller = props.get("seller") or props.get("author") or props.get("user") or {}
         return {
-            "title": title, "price": price, "description": desc,
-            "image": image, "images": images[:8],
+            "title": title,
+            "price": price,
+            "description": desc,
+            "image": image,
+            "images": images[:8],
             "mannerTemp": seller.get("mannerTemperature") or seller.get("temperature"),
-            "sellerName": seller.get("nickname",""),
+            "sellerName": seller.get("nickname", ""),
             "condition": "used",
             "crawlFailed": not bool(title or price),
         }
     except Exception as e:
         logger.error(f"[Crawl] 오류: {e}")
         return {"crawlFailed": True}
-
