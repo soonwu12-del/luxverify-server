@@ -30,7 +30,10 @@ app = FastAPI(title="LuxVerify Price API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+allow_methods=["GET", "POST", "OPTIONS"],
+allow_credentials=False,
+max_age=86400,
+
     allow_headers=["*"],
 )
 
