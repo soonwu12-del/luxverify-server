@@ -89,8 +89,10 @@ async def gpt_proxy(request: Request):
     OpenAI ChatCompletion 프록시.
     프론트엔드가 API 키 없이 GPT를 호출할 수 있도록 Railway 서버에서 중계.
     """
-    if not openai_client.api_key:
+        api_key = os.environ.get("OPENAI_API_KEY", "").strip().replace("\n","").replace("\r","").replace(" ","")
+    if not api_key:
         return JSONResponse({"error": "API key not configured on server"}, status_code=500)
+
 
     try:
         body = await request.json()
@@ -106,7 +108,9 @@ async def gpt_proxy(request: Request):
         return JSONResponse({"error": "messages is required"}, status_code=400)
 
     try:
-        resp = await openai_client.chat.completions.create(
+                client = AsyncOpenAI(api_key=api_key)
+        resp = await client.chat.completions.create(
+
             model=model,
             messages=messages,
             max_tokens=max_tokens,
