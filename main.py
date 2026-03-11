@@ -1,18 +1,10 @@
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
-import asyncio
-import logging
-import os
-import json
-import re
-from openai import AsyncOpenAI
+import asyncio, logging, os, json, re
 from scraper_kream import scrape_kream
 from scraper_bunjang import scrape_bunjang
-
-OPENAI_API_KEY = "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"
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +16,6 @@ async def lifespan(app: FastAPI):
     logger.info("Server shutting down")
 
 app = FastAPI(title="LuxVerify Price API", lifespan=lifespan)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -59,33 +50,6 @@ async def get_kream(q: str = Query(...)):
 async def get_bunjang(q: str = Query(...)):
     result = await scrape_bunjang(q)
     return {"keyword": q, **result}
-
-@app.post("/api/gpt")
-async def gpt_proxy(request: Request):
-    try:
-        body = await request.json()
-    except Exception:
-        return JSONResponse({"error": "Invalid JSON body"}, status_code=400)
-    messages = body.get("messages", [])
-    model = body.get("model", "gpt-4o-mini")
-    max_tokens = body.get("max_tokens", 1500)
-    temperature = body.get("temperature", 0.7)
-    if not messages:
-        return JSONResponse({"error": "messages is required"}, status_code=400)
-    try:
-        client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-        resp = await client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature,
-        )
-        content = resp.choices[0].message.content
-        logger.info(f"[GPT] OK tokens={resp.usage.total_tokens}")
-        return {"choices": [{"message": {"content": content}}]}
-    except Exception as e:
-        logger.error(f"[GPT] 오류: {type(e).__name__}: {e}")
-        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.get("/api/crawl")
 async def crawl_daangn(url: str = Query(...)):
