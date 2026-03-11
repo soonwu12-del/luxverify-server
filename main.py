@@ -14,7 +14,8 @@ from scraper_bunjang import scrape_bunjang
 # ── OpenAI ──────────────────────────────────────────────────────────────────
 from openai import AsyncOpenAI
 
-openai_client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY", ""))
+openai_client = AsyncOpenAI(api_key=os.environ.get("OPENAI_API_KEY", "").strip().replace("\n", "").replace("\r", "").replace(" ", ""))
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
