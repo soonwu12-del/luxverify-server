@@ -46,6 +46,22 @@ async def get_kream(q: str = Query(...)):
 async def get_bunjang(q: str = Query(...)):
     return {"keyword": q, **(await scrape_bunjang(q))}
 
+@app.get("/api/proxy")
+async def proxy(url: str = Query(...)):
+    import httpx
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Android 13; Mobile) AppleWebKit/537.36",
+        "Accept": "application/json",
+        "Referer": "https://m.bunjang.co.kr/",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True) as client:
+            res = await client.get(url, headers=headers)
+        return res.json()
+    except Exception as e:
+        logger.error(f"[Proxy] 오류: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 @app.post("/api/gpt")
 async def gpt_proxy(request: Request):
     try:
@@ -132,3 +148,4 @@ async def crawl_daangn(url: str = Query(...)):
     except Exception as e:
         logger.error(f"[Crawl] 오류: {e}")
         return {"crawlFailed": True}
+
