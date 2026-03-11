@@ -11,7 +11,8 @@ from openai import AsyncOpenAI
 from scraper_kream import scrape_kream
 from scraper_bunjang import scrape_bunjang
 
-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
+OPENAI_API_KEY = "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"
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
