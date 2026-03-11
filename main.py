@@ -7,8 +7,6 @@ from scraper_kream import scrape_kream
 from scraper_bunjang import scrape_bunjang
 from openai import AsyncOpenAI
 
-OPENAI_API_KEY = "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"
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -60,8 +58,11 @@ async def gpt_proxy(request: Request):
     temperature = body.get("temperature", 0.7)
     if not messages:
         return JSONResponse({"error": "messages is required"}, status_code=400)
+    api_key = body.get("api_key", "")
+    if not api_key:
+        return JSONResponse({"error": "api_key is required"}, status_code=400)
     try:
-        client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+        client = AsyncOpenAI(api_key=api_key)
         resp = await client.chat.completions.create(
             model=model, messages=messages,
             max_tokens=max_tokens, temperature=temperature,
