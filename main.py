@@ -56,9 +56,9 @@ async def gpt_proxy(request: Request):
     model = body.get("model", "gpt-4o-mini")
     max_tokens = body.get("max_tokens", 1500)
     temperature = body.get("temperature", 0.7)
+    api_key = body.get("api_key", "").strip()
     if not messages:
         return JSONResponse({"error": "messages is required"}, status_code=400)
-    api_key = body.get("api_key", "")
     if not api_key:
         return JSONResponse({"error": "api_key is required"}, status_code=400)
     try:
@@ -121,3 +121,4 @@ async def crawl_daangn(url: str = Query(...)):
     except Exception as e:
         logger.error(f"[Crawl] 오류: {e}")
         return {"crawlFailed": True}
+
